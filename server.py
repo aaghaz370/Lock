@@ -714,14 +714,80 @@ Tap to copy → Paste on website!
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await query.edit_message_text(
-            f"⚙️ **Settings Updated**\n\n"
-            f"Public: {'✅' if bot_settings['public_generation'] else '❌'}\n"
-            f"Premium Only: {'✅' if bot_settings['premium_only'] else '❌'}\n"
-            f"Renewals: {'✅' if bot_settings['allow_key_renewal'] else '❌'}",
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        )
+        settings_text = f"""
+⚙️ **Bot Settings**
+
+**Generation Mode:**
+• Public: {'✅ Enabled' if bot_settings['public_generation'] else '❌ Disabled'}
+• Premium Only: {'✅ Active' if bot_settings['premium_only'] else '❌ Inactive'}
+
+**Key Settings:**
+• Expiry Time: {bot_settings['key_expiry_hours']} hours
+• Max Per User: {bot_settings['max_keys_per_user']} keys
+• Renewals: {'✅ Allowed' if bot_settings['allow_key_renewal'] else '❌ Disabled'}
+
+**Current Mode:**
+{('🟢 Anyone can generate' if bot_settings['public_generation'] else '⭐ Premium users only' if bot_settings['premium_only'] else '👑 Admin only')}
+"""
+        
+        await query.edit_message_text(settings_text, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    # Toggle Settings
+    elif query.data.startswith("toggle_"):
+        if not is_admin_user:
+            await query.answer("❌ Admin only", show_alert=True)
+            return
+        
+        if query.data == "toggle_public":
+            bot_settings["public_generation"] = not bot_settings["public_generation"]
+            await query.answer(f"Public generation {'enabled' if bot_settings['public_generation'] else 'disabled'}!", show_alert=True)
+        elif query.data == "toggle_premium_only":
+            bot_settings["premium_only"] = not bot_settings["premium_only"]
+            await query.answer(f"Premium mode {'enabled' if bot_settings['premium_only'] else 'disabled'}!", show_alert=True)
+        elif query.data == "toggle_renewal":
+            bot_settings["allow_key_renewal"] = not bot_settings["allow_key_renewal"]
+            await query.answer(f"Key renewal {'enabled' if bot_settings['allow_key_renewal'] else 'disabled'}!", show_alert=True)
+        
+        # Refresh settings page
+        keyboard = [
+            [InlineKeyboardButton(
+                f"{'🟢' if bot_settings['public_generation'] else '🔴'} Public Generation",
+                callback_data="toggle_public"
+            )],
+            [InlineKeyboardButton(
+                f"{'🟢' if bot_settings['premium_only'] else '🔴'} Premium Only Mode",
+                callback_data="toggle_premium_only"
+            )],
+            [InlineKeyboardButton(
+                f"{'🟢' if bot_settings['allow_key_renewal'] else '🔴'} Allow Renewals",
+                callback_data="toggle_renewal"
+            )],
+            [InlineKeyboardButton(
+                f"⏰ Expiry: {bot_settings['key_expiry_hours']}h",
+                callback_data="change_expiry"
+            )],
+            [InlineKeyboardButton(
+                f"🔢 Max Keys: {bot_settings['max_keys_per_user']}",
+                callback_data="change_max_keys"
+            )],
+            [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        settings_text = f"""
+⚙️ **Settings Updated**
+
+**Generation Mode:**
+• Public: {'✅ Enabled' if bot_settings['public_generation'] else '❌ Disabled'}
+• Premium Only: {'✅ Active' if bot_settings['premium_only'] else '❌ Inactive'}
+
+**Key Settings:**
+• Expiry Time: {bot_settings['key_expiry_hours']} hours
+• Max Per User: {bot_settings['max_keys_per_user']} keys
+• Renewals: {'✅ Allowed' if bot_settings['allow_key_renewal'] else '❌ Disabled'}
+"""
+        
+        await query.edit_message_text(settings_text, reply_markup=reply_markup, parse_mode='Markdown')
     
     # Change Expiry
     elif query.data == "change_expiry":
@@ -1315,64 +1381,4 @@ if __name__ == '__main__':
     
     # Start Flask server
     print("🌐 Starting web server...\n")
-    app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)'] else '🔴' } Allow Renewals",
-                callback_data="toggle_renewal"
-            )],
-            [InlineKeyboardButton(
-                f"⏰ Expiry: {bot_settings['key_expiry_hours']}h",
-                callback_data="change_expiry"
-            )],
-            [InlineKeyboardButton(
-                f"🔢 Max Keys: {bot_settings['max_keys_per_user']}",
-                callback_data="change_max_keys"
-            )],
-            [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        settings_text = f"""
-⚙️ **Bot Settings**
-
-**Generation Mode:**
-• Public: {'✅ Enabled' if bot_settings['public_generation'] else '❌ Disabled'}
-• Premium Only: {'✅ Active' if bot_settings['premium_only'] else '❌ Inactive'}
-
-**Key Settings:**
-• Expiry Time: {bot_settings['key_expiry_hours']} hours
-• Max Per User: {bot_settings['max_keys_per_user']} keys
-• Renewals: {'✅ Allowed' if bot_settings['allow_key_renewal'] else '❌ Disabled'}
-
-**Current Mode:**
-{('🟢 Anyone can generate' if bot_settings['public_generation'] else '⭐ Premium users only' if bot_settings['premium_only'] else '👑 Admin only')}
-"""
-        
-        await query.edit_message_text(settings_text, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Toggle Settings
-    elif query.data.startswith("toggle_"):
-        if not is_admin_user:
-            await query.answer("❌ Admin only", show_alert=True)
-            return
-        
-        if query.data == "toggle_public":
-            bot_settings["public_generation"] = not bot_settings["public_generation"]
-            await query.answer(f"Public generation {'enabled' if bot_settings['public_generation'] else 'disabled'}!", show_alert=True)
-        elif query.data == "toggle_premium_only":
-            bot_settings["premium_only"] = not bot_settings["premium_only"]
-            await query.answer(f"Premium mode {'enabled' if bot_settings['premium_only'] else 'disabled'}!", show_alert=True)
-        elif query.data == "toggle_renewal":
-            bot_settings["allow_key_renewal"] = not bot_settings["allow_key_renewal"]
-            await query.answer(f"Key renewal {'enabled' if bot_settings['allow_key_renewal'] else 'disabled'}!", show_alert=True)
-        
-        # Refresh settings page
-        keyboard = [
-            [InlineKeyboardButton(
-                f"{'🟢' if bot_settings['public_generation'] else '🔴'} Public Generation",
-                callback_data="toggle_public"
-            )],
-            [InlineKeyboardButton(
-                f"{'🟢' if bot_settings['premium_only'] else '🔴'} Premium Only Mode",
-                callback_data="toggle_premium_only"
-            )],
-            [InlineKeyboardButton(
-                f"{'🟢' if bot_settings['allow_key_renewal
+    app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)
