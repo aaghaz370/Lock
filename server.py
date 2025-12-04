@@ -1315,7 +1315,7 @@ if __name__ == '__main__':
     
     # Start Flask server
     print("🌐 Starting web server...\n")
-    app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)'] else '🔴'} Allow Renewals",
+    app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)'] else ''} Allow Renewals",
                 callback_data="toggle_renewal"
             )],
             [InlineKeyboardButton(
